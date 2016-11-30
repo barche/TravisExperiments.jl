@@ -1,19 +1,27 @@
 # Documentation: http://docs.travis-ci.com/user/languages/julia/
 language: julia
-os:
-  - linux
-  - osx
-julia:
-  - release
-  - nightly
+sudo: required
+dist: trusty
+matrix:
+  include:
+    - os: linux
+      env:
+        - QML_SKIP_GUI_TESTS=1
+      before_script:
+        - "export DISPLAY=:99.0"
+        - "sh -e /etc/init.d/xvfb start"
+        - sleep 3 # give xvfb some time to start
+      addons:
+        apt:
+          packages:
+            - cmake
+            - cmake-data
+            - qtdeclarative5-dev
+            - qtdeclarative5-qtquick2-plugin
+            - qtdeclarative5-dialogs-plugin
+            - qtdeclarative5-controls-plugin
+            - qtdeclarative5-quicklayouts-plugin
+            - qtdeclarative5-window-plugin
+      julia: release
 notifications:
   email: false
-# uncomment the following lines to override the default test script
-#script:
-#  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-#  - julia -e 'Pkg.clone(pwd()); Pkg.build("TravisExperiments"); Pkg.test("TravisExperiments"; coverage=true)'
-after_success:
-  # push coverage results to Coveralls
-  - julia -e 'cd(Pkg.dir("TravisExperiments")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
-  # push coverage results to Codecov
-  - julia -e 'cd(Pkg.dir("TravisExperiments")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
